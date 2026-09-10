@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "FUNSROOMS Mini ERP + CRM Operations API",
+    "description": "Comprehensive Postman collection for testing Authentication, RBAC, Customer CRM, Products & Inventory, Stock Movements, and Sales Challans with atomic stock deduction and PDF export.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "challanId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login - Admin Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@funsrooms.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Sales Role",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@funsrooms.com\",\n  \"password\": \"Sales@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Get Demo Test Accounts",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/demo-accounts", "host": ["{{baseUrl}}"], "path": ["auth", "demo-accounts"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Get Operational KPIs & Activity",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard/overview", "host": ["{{baseUrl}}"], "path": ["dashboard", "overview"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Customer CRM",
+      "item": [
+        {
+          "name": "Get Customers (Search & Filter)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=1&limit=10&search=&status=&customerType=",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "status", "value": "" },
+                { "key": "customerType", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer By ID (With Follow-up Logs)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+          }
+        },
+        {
+          "name": "Create New Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Patel\",\n  \"mobile\": \"+91 98765 43210\",\n  \"email\": \"ramesh@patelsupplies.com\",\n  \"businessName\": \"Patel Hardware & Supplies\",\n  \"gstNumber\": \"24AABCP1234F1Z9\",\n  \"customerType\": \"Wholesale\",\n  \"address\": \"Shop 14, GIDC Market, Surat, Gujarat\",\n  \"status\": \"Lead\",\n  \"followUpDate\": \"2026-09-15\",\n  \"notes\": \"Inquired for bulk purchase of power drills and safety kits.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/customers", "host": ["{{baseUrl}}"], "path": ["customers"] }
+          }
+        },
+        {
+          "name": "Add Customer Follow-up Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Spoke on phone. Client verified commercial tax certificate and requested quotation.\",\n  \"nextFollowUpDate\": \"2026-09-18\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/customers/{{customerId}}/follow-up", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}", "follow-up"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Product & Inventory",
+      "item": [
+        {
+          "name": "Get Products (Catalog & Low Stock)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/products?page=1&limit=10&lowStock=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "lowStock", "value": "false" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create New Product SKU",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Angle Grinder 100mm 750W\",\n  \"sku\": \"TOOL-GRN-007\",\n  \"category\": \"Power Tools\",\n  \"unitPrice\": 4200,\n  \"currentStock\": 30,\n  \"minStockAlert\": 8,\n  \"warehouseLocation\": \"Bay A-09\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Quick Stock Adjustment (IN or OUT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 10,\n  \"movementType\": \"IN\",\n  \"reason\": \"Supplier Restock Shipment Batch #ST-902\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/products/{{productId}}/adjust-stock", "host": ["{{baseUrl}}"], "path": ["products", "{{productId}}", "adjust-stock"] }
+          }
+        },
+        {
+          "name": "Get Stock Movement Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/products/logs/movements?page=1&limit=20", "host": ["{{baseUrl}}"], "path": ["products", "logs", "movements"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Sales Challan Module",
+      "item": [
+        {
+          "name": "Get Challans (List & Search)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/challans?page=1&limit=10&status=", "host": ["{{baseUrl}}"], "path": ["challans"] }
+          }
+        },
+        {
+          "name": "Create Sales Challan (Multi-Product & Snapshot)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"status\": \"Draft\",\n  \"notes\": \"Site delivery scheduled for Monday 10:00 AM.\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/challans", "host": ["{{baseUrl}}"], "path": ["challans"] }
+          }
+        },
+        {
+          "name": "Confirm Challan (Atomic Stock Deduction)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Confirmed\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/challans/{{challanId}}/status", "host": ["{{baseUrl}}"], "path": ["challans", "{{challanId}}", "status"] }
+          }
+        },
+        {
+          "name": "Download Invoice / Challan PDF",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": { "raw": "{{baseUrl}}/challans/{{challanId}}/pdf", "host": ["{{baseUrl}}"], "path": ["challans", "{{challanId}}", "pdf"] }
+          }
+        }
+      ]
+    }
+  ]
+}
