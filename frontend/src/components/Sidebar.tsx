@@ -22,6 +22,7 @@ interface SidebarProps {
     challans?: number;
     customers?: number;
     products?: number;
+    notifications?: number;
   };
 }
 
@@ -53,10 +54,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
   ];
 
   const accountItems = [
-    { id: 'account', label: 'Account', icon: User },
-    { id: 'history', label: 'History', icon: History },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'account', label: 'Account', icon: User, count: null },
+    { id: 'history', label: 'History', icon: History, count: null },
+    { id: 'notifications', label: 'Notifications', icon: Bell, count: counts?.notifications || 3 },
+    { id: 'settings', label: 'Settings', icon: Settings, count: null },
   ];
 
   return (
@@ -173,6 +174,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
                   <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
                   <span>{item.label}</span>
                 </div>
+                {item.count && (
+                  <span
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: item.id === 'notifications' ? 'var(--danger)' : 'var(--primary-blue)',
+                      color: '#ffffff',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {item.count}
+                  </span>
+                )}
               </button>
             );
           })}

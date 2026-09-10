@@ -8,6 +8,10 @@ import { Customers } from './pages/Customers';
 import { Products } from './pages/Products';
 import { StockLogs } from './pages/StockLogs';
 import { Challans } from './pages/Challans';
+import { Account } from './pages/Account';
+import { History as HistoryPage } from './pages/History';
+import { Notifications } from './pages/Notifications';
+import { Settings } from './pages/Settings';
 
 export const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -64,6 +68,26 @@ export const App: React.FC = () => {
             </div>
           )}
           {currentTab === 'challans' && <Challans />}
+          {currentTab === 'account' && (
+            <div className="page-scrollable">
+              <Account />
+            </div>
+          )}
+          {currentTab === 'history' && (
+            <div className="page-scrollable">
+              <HistoryPage />
+            </div>
+          )}
+          {currentTab === 'notifications' && (
+            <div className="page-scrollable">
+              <Notifications onNavigate={setCurrentTab} />
+            </div>
+          )}
+          {currentTab === 'settings' && (
+            <div className="page-scrollable">
+              <Settings />
+            </div>
+          )}
         </main>
       </div>
     </div>
