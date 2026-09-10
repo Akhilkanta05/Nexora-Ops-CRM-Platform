@@ -1,6 +1,6 @@
-# Mini ERP + CRM Operations Portal
+# Nexora — Business Operations & CRM Platform
 
-A full-stack, enterprise-grade Mini ERP + CRM operations portal designed for wholesale and distribution companies. The system manages customers, products, inventory stock, purchase orders, automated sales challans, invoice generation, and CRM follow-ups with role-based access control (RBAC).
+A full-stack, enterprise-grade business operations & CRM platform designed for wholesale and distribution companies. The system manages customers, products, inventory stock, purchase orders, automated sales challans, invoice generation, and CRM follow-ups with role-based access control (RBAC).
 
 ---
 
@@ -42,10 +42,10 @@ The database seeder automatically configures test accounts for all 4 roles. You 
 
 | Role | Email | Password | Allowed Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@company.com` | `Admin@123` | Full access across all modules, inventory, and users |
-| **Sales** | `sales@company.com` | `Sales@123` | Customer CRM, follow-up timeline notes, Create/Draft/Confirm Challans |
-| **Warehouse** | `warehouse@company.com` | `Warehouse@123` | Product catalog, Stock adjustments (IN/OUT), movement audit logs, dispatch |
-| **Accounts** | `accounts@company.com` | `Accounts@123` | View customers, view challans, download PDF invoices, revenue KPIs |
+| **Admin** | `admin@nexora.com` | `Admin@123` | Full access across all modules, inventory, and users |
+| **Sales** | `sales@nexora.com` | `Sales@123` | Customer CRM, follow-up timeline notes, Create/Draft/Confirm Challans |
+| **Warehouse** | `warehouse@nexora.com` | `Warehouse@123` | Product catalog, Stock adjustments (IN/OUT), movement audit logs, dispatch |
+| **Accounts** | `accounts@nexora.com` | `Accounts@123` | View customers, view challans, download PDF invoices, revenue KPIs |
 
 ---
 
@@ -88,7 +88,7 @@ The project includes an automatic SQLite mode (`dev.db`) for immediate local exe
 1. **Clone the repository**:
    ```bash
    git clone <repo-url>
-   cd mini-erp-crm
+   cd nexora
    ```
 
 2. **Install dependencies and setup database**:
@@ -141,7 +141,7 @@ Environment variables are isolated into `.env` files (with `.env.example` templa
 | :--- | :--- | :--- |
 | `PORT` | API server port | `5000` |
 | `NODE_ENV` | Environment mode | `development` / `production` |
-| `DATABASE_URL` | PostgreSQL or SQLite connection string | `postgresql://user:pass@host:5432/erp_operations?schema=public` |
+| `DATABASE_URL` | PostgreSQL or SQLite connection string | `postgresql://user:pass@host:5432/nexora_db?schema=public` |
 | `JWT_SECRET` | Secret key for signing JWT tokens | `your_secure_random_key` |
 | `JWT_EXPIRES_IN` | Session validity duration | `7d` |
 | `FRONTEND_URL` | Allowed origin for CORS | `http://localhost:5173` |

@@ -29,10 +29,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
   const { user, logout, login, hasRole } = useAuth();
 
   const demoRoles = [
-    { role: 'ADMIN', email: 'admin@company.com', pass: 'Admin@123', label: 'Admin' },
-    { role: 'SALES', email: 'sales@company.com', pass: 'Sales@123', label: 'Sales' },
-    { role: 'WAREHOUSE', email: 'warehouse@company.com', pass: 'Warehouse@123', label: 'Warehouse' },
-    { role: 'ACCOUNTS', email: 'accounts@company.com', pass: 'Accounts@123', label: 'Accounts' },
+    { role: 'ADMIN', email: 'admin@nexora.com', pass: 'Admin@123', label: 'Admin' },
+    { role: 'SALES', email: 'sales@nexora.com', pass: 'Sales@123', label: 'Sales' },
+    { role: 'WAREHOUSE', email: 'warehouse@nexora.com', pass: 'Warehouse@123', label: 'Warehouse' },
+    { role: 'ACCOUNTS', email: 'accounts@nexora.com', pass: 'Accounts@123', label: 'Accounts' },
   ];
 
   const handleRoleSwitch = async (email: string, pass: string) => {
@@ -74,14 +74,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
             justifyContent: 'center',
             color: '#0f172a',
             fontWeight: 800,
-            fontSize: '1rem',
+            fontSize: '1.05rem',
           }}
         >
-          <span style={{ transform: 'translateY(-1px)' }}>G</span>
+          <span style={{ transform: 'translateY(-1px)' }}>N</span>
         </div>
-        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em' }}>
-          Operations
-        </span>
+        <div>
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em', display: 'block', lineHeight: 1.15 }}>
+            Nexora
+          </span>
+          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.02em', display: 'block', textTransform: 'uppercase' }}>
+            Ops & CRM Platform
+          </span>
+        </div>
       </div>
 
       {/* MENU Section */}

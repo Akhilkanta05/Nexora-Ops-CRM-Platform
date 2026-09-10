@@ -20,25 +20,25 @@ async function main() {
   const users = [
     {
       name: 'System Administrator',
-      email: 'admin@company.com',
+      email: 'admin@nexora.com',
       passwordHash: await bcrypt.hash('Admin@123', salt),
       role: 'ADMIN',
     },
     {
       name: 'Sarah Jenkins (Sales)',
-      email: 'sales@company.com',
+      email: 'sales@nexora.com',
       passwordHash: await bcrypt.hash('Sales@123', salt),
       role: 'SALES',
     },
     {
       name: 'Wayne Miller (Warehouse)',
-      email: 'warehouse@company.com',
+      email: 'warehouse@nexora.com',
       passwordHash: await bcrypt.hash('Warehouse@123', salt),
       role: 'WAREHOUSE',
     },
     {
       name: 'Alice Cooper (Accounts)',
-      email: 'accounts@company.com',
+      email: 'accounts@nexora.com',
       passwordHash: await bcrypt.hash('Accounts@123', salt),
       role: 'ACCOUNTS',
     },

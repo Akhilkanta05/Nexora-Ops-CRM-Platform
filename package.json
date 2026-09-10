@@ -1,7 +1,7 @@
 {
-  "name": "mini-erp-crm-portal",
+  "name": "nexora-platform",
   "version": "1.0.0",
-  "description": "Mini ERP + CRM Operations Portal for Wholesale and Distribution",
+  "description": "Nexora — Business Operations & CRM Platform",
   "scripts": {
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",

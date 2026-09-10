@@ -7,10 +7,10 @@ export const Navbar: React.FC = () => {
   const [switching, setSwitching] = useState(false);
 
   const demoUsers = [
-    { role: 'ADMIN', email: 'admin@company.com', pass: 'Admin@123', label: 'Admin' },
-    { role: 'SALES', email: 'sales@company.com', pass: 'Sales@123', label: 'Sales' },
-    { role: 'WAREHOUSE', email: 'warehouse@company.com', pass: 'Warehouse@123', label: 'Warehouse' },
-    { role: 'ACCOUNTS', email: 'accounts@company.com', pass: 'Accounts@123', label: 'Accounts' },
+    { role: 'ADMIN', email: 'admin@nexora.com', pass: 'Admin@123', label: 'Admin' },
+    { role: 'SALES', email: 'sales@nexora.com', pass: 'Sales@123', label: 'Sales' },
+    { role: 'WAREHOUSE', email: 'warehouse@nexora.com', pass: 'Warehouse@123', label: 'Warehouse' },
+    { role: 'ACCOUNTS', email: 'accounts@nexora.com', pass: 'Accounts@123', label: 'Accounts' },
   ];
 
   const handleQuickSwitch = async (email: string, pass: string) => {
@@ -50,7 +50,7 @@ export const Navbar: React.FC = () => {
           }}
         >
           <ShieldCheck size={16} color="var(--accent-primary)" />
-          Operations Portal
+          Nexora — Business Operations & CRM Platform
         </span>
       </div>
 

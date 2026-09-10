@@ -1,7 +1,7 @@
 {
-  "name": "mini-erp-crm-backend",
+  "name": "nexora-backend",
   "version": "1.0.0",
-  "description": "Mini ERP + CRM Operations Portal Backend API",
+  "description": "Nexora Backend API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

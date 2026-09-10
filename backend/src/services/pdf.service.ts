@@ -24,9 +24,9 @@ export class PdfService {
     doc.pipe(res);
 
     // Header styling
-    doc.fillColor('#1e293b').fontSize(20).text('WHOLESALE DISTRIBUTION ERP', 50, 50, { bold: true } as any);
-    doc.fontSize(10).fillColor('#64748b').text('Industrial Goods & Commercial Distribution Operations', 50, 75);
-    doc.text('GSTIN: 27AABCF1234F1Z8 | Email: billing@company.com | Tel: +91 22 4000 8888', 50, 90);
+    doc.fillColor('#1e293b').fontSize(20).text('NEXORA — OPERATIONS & CRM', 50, 50, { bold: true } as any);
+    doc.fontSize(10).fillColor('#64748b').text('Industrial Goods & Commercial Wholesale Platform', 50, 75);
+    doc.text('GSTIN: 27AABCF1234F1Z8 | Email: billing@nexora.com | Tel: +91 22 4000 8888', 50, 90);
 
     // Divider
     doc.moveTo(50, 110).lineTo(545, 110).strokeColor('#cbd5e1').stroke();
@@ -120,7 +120,7 @@ export class PdfService {
     doc.text('2. Disputes, if any, are subject to local jurisdiction only.', 60, footerY + 30);
     doc.text('3. This is a computer generated document and valid upon confirmation.', 60, footerY + 40);
 
-    doc.fontSize(9).fillColor('#0f172a').text('For WHOLESALE ENTERPRISES', 370, footerY + 12, { align: 'center', width: 160 });
+    doc.fontSize(9).fillColor('#0f172a').text('For NEXORA OPERATIONS & CRM', 370, footerY + 12, { align: 'center', width: 160 });
     doc.fontSize(8).fillColor('#64748b').text('Authorised Signatory', 370, footerY + 46, { align: 'center', width: 160 });
 
     doc.end();
