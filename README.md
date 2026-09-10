@@ -87,8 +87,8 @@ The project includes an automatic SQLite mode (`dev.db`) for immediate local exe
 
 1. **Clone the repository**:
    ```bash
-   git clone <repo-url>
-   cd nexora
+   git clone https://github.com/Akhilkanta05/Nexora-Ops-CRM-Platform.git
+   cd Nexora-Ops-CRM-Platform
    ```
 
 2. **Install dependencies and setup database**:
