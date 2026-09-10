@@ -198,10 +198,10 @@ To run the business logic test suite validating atomic stock deduction, negative
 
 ```bash
 cd backend
-npx ts-node test-suite.ts
+npm test
 ```
 
-All 14 business logic tests run in-memory and report automated pass/fail results.
+All 15 business logic and bonus feature tests run and report automated pass/fail results (100% pass rate).
 
 ---
 

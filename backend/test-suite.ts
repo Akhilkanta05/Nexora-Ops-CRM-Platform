@@ -1,5 +1,6 @@
 import { prisma } from './src/utils/prisma';
 import { StockService } from './src/services/stock.service';
+import { S3Service } from './src/services/s3.service';
 import bcrypt from 'bcryptjs';
 
 async function runTests() {
@@ -126,7 +127,14 @@ async function runTests() {
       `Stock was deducted from 12 to 8 upon challan confirmation (actual: ${updatedProdAfterChallan!.currentStock})`
     );
 
-    // 7. Clean up test record
+    // 7. Bonus: AWS S3 Product Image Upload
+    const s3Result = await S3Service.getPresignedUploadUrl('test_drill.png', 'image/png');
+    assert(
+      s3Result && s3Result.uploadUrl.includes('test_drill.png'),
+      `AWS S3 product image upload service generates valid upload URL (Bonus Point)`
+    );
+
+    // 8. Clean up test record
     await prisma.challanItem.deleteMany({ where: { challanId: draftChallan.id } });
     await prisma.salesChallan.delete({ where: { id: draftChallan.id } });
     await prisma.stockMovement.deleteMany({ where: { productId: testProduct.id } });

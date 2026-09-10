@@ -14,10 +14,18 @@
     "db:setup": "prisma generate && prisma db push && ts-node prisma/seed.ts",
     "test": "ts-node test-suite.ts"
   },
-  "keywords": ["erp", "crm", "wholesale", "inventory", "challan"],
+  "keywords": [
+    "erp",
+    "crm",
+    "wholesale",
+    "inventory",
+    "challan"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1129.0",
+    "@aws-sdk/s3-request-presigner": "^3.1129.0",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

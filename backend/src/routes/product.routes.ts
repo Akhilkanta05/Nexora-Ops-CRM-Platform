@@ -16,6 +16,7 @@ router.use(authenticate);
 // View products & stock logs: Admin, Sales, Warehouse, Accounts
 router.get('/', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'), ProductController.getProducts);
 router.get('/logs/movements', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'), ProductController.getStockLogs);
+router.post('/upload-url', authorizeRoles('ADMIN', 'WAREHOUSE'), ProductController.getUploadUrl);
 router.get('/:id', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'), ProductController.getProductById);
 
 // Create & Edit products: Admin, Warehouse

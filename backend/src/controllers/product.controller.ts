@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
 import { StockService } from '../services/stock.service';
+import { S3Service } from '../services/s3.service';
 import { NotFoundError, BadRequestError } from '../utils/errors';
 
 export const createProductSchema = z.object({
@@ -252,6 +253,23 @@ export class ProductController {
           limit,
           totalPages: Math.ceil(total / limit) || 1,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getUploadUrl(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { filename, contentType } = req.body;
+      if (!filename || !contentType) {
+        throw new BadRequestError('filename and contentType are required');
+      }
+
+      const result = await S3Service.getPresignedUploadUrl(filename, contentType);
+      return res.status(200).json({
+        success: true,
+        data: result,
       });
     } catch (error) {
       next(error);
