@@ -1,93 +1,107 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard,
-  Users,
-  Package,
+  LayoutGrid,
+  Box,
+  Users2,
+  FileBarChart,
+  ShieldCheck,
   ArrowLeftRight,
-  FileText,
-  Boxes,
+  User,
+  History,
+  Bell,
+  Settings,
+  LogOut,
+  Sparkles,
 } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  counts?: {
+    challans?: number;
+    customers?: number;
+    products?: number;
+  };
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) => {
-  const { hasRole } = useAuth();
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, counts }) => {
+  const { user, logout, login, hasRole } = useAuth();
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, visible: true },
-    { id: 'customers', label: 'Customer CRM', icon: Users, visible: hasRole('SALES', 'ACCOUNTS') },
-    { id: 'products', label: 'Inventory & Stock', icon: Package, visible: true },
-    { id: 'stock-logs', label: 'Stock Movement Logs', icon: ArrowLeftRight, visible: hasRole('WAREHOUSE', 'SALES', 'ACCOUNTS') },
-    { id: 'challans', label: 'Sales Challans', icon: FileText, visible: hasRole('SALES', 'WAREHOUSE', 'ACCOUNTS') },
+  const demoRoles = [
+    { role: 'ADMIN', email: 'admin@company.com', pass: 'Admin@123', label: 'Admin' },
+    { role: 'SALES', email: 'sales@company.com', pass: 'Sales@123', label: 'Sales' },
+    { role: 'WAREHOUSE', email: 'warehouse@company.com', pass: 'Warehouse@123', label: 'Warehouse' },
+    { role: 'ACCOUNTS', email: 'accounts@company.com', pass: 'Accounts@123', label: 'Accounts' },
+  ];
+
+  const handleRoleSwitch = async (email: string, pass: string) => {
+    try {
+      await login(email, pass);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const navMenuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, count: null },
+    { id: 'challans', label: 'Bills', icon: ShieldCheck, count: counts?.challans || 4 },
+    { id: 'products', label: 'Products', icon: Box, count: null },
+    { id: 'customers', label: 'Customers', icon: Users2, count: null },
+    { id: 'stock-logs', label: 'Reports', icon: FileBarChart, count: null },
+    { id: 'transactions', label: 'Transaction', icon: ArrowLeftRight, count: null },
+  ];
+
+  const accountItems = [
+    { id: 'account', label: 'Account', icon: User },
+    { id: 'history', label: 'History', icon: History },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
-    <aside
-      style={{
-        width: '260px',
-        background: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border-subtle)',
-        display: 'flex',
-        flexDirection: 'column',
-        flexShrink: 0,
-      }}
-    >
-      {/* Brand Header */}
-      <div
-        style={{
-          padding: '1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          borderBottom: '1px solid var(--border-subtle)',
-        }}
-      >
+    <aside className="col-sidebar">
+      {/* Brand Logo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
         <div
           style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: 'var(--radius-md)',
-            background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+            width: '34px',
+            height: '34px',
+            borderRadius: '9px',
+            border: '2px solid #0f172a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            boxShadow: 'var(--shadow-glow)',
+            color: '#0f172a',
+            fontWeight: 800,
+            fontSize: '1rem',
           }}
         >
-          <Boxes size={22} />
+          <span style={{ transform: 'translateY(-1px)' }}>G</span>
         </div>
-        <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-            MINI ERP + CRM
-          </h2>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-            Operations Portal
-          </span>
-        </div>
+        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em' }}>
+          Operations
+        </span>
       </div>
 
-      {/* Nav List */}
-      <nav style={{ padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+      {/* MENU Section */}
+      <div style={{ marginBottom: '1.75rem' }}>
         <div
           style={{
-            fontSize: '0.7rem',
-            color: 'var(--text-muted)',
+            fontSize: '0.68rem',
             fontWeight: 700,
-            padding: '0.5rem 0.75rem',
+            color: 'var(--text-muted)',
+            letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            letterSpacing: '0.06em',
+            marginBottom: '0.75rem',
+            paddingLeft: '0.5rem',
           }}
         >
-          Operations Menu
+          MENU
         </div>
-        {navItems
-          .filter((item) => item.visible)
-          .map((item) => {
+
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {navMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
             return (
@@ -97,46 +111,153 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.85rem',
-                  padding: '0.75rem 1rem',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
                   borderRadius: 'var(--radius-sm)',
                   border: 'none',
-                  background: isActive ? 'var(--bg-surface-elevated)' : 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: isActive ? 'var(--bg-active-pill)' : 'transparent',
+                  color: isActive ? 'var(--primary-blue)' : 'var(--text-secondary)',
                   fontWeight: isActive ? 700 : 500,
                   fontSize: '0.875rem',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'var(--transition)',
-                  borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
                 }}
               >
-                <Icon
-                  size={18}
-                  color={isActive ? 'var(--accent-primary)' : 'var(--text-muted)'}
-                />
-                {item.label}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <span>{item.label}</span>
+                </div>
+                {item.count && (
+                  <span
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: 'var(--primary-blue)',
+                      color: '#ffffff',
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {item.count}
+                  </span>
+                )}
               </button>
             );
           })}
-      </nav>
+        </nav>
+      </div>
 
-      {/* Wholesale Operations Badge at bottom */}
-      <div style={{ marginTop: 'auto', padding: '1.25rem' }}>
+      {/* ACCOUNT Section */}
+      <div>
         <div
           style={{
-            background: 'rgba(99, 102, 241, 0.08)',
-            border: '1px solid rgba(99, 102, 241, 0.2)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.85rem',
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            color: 'var(--text-muted)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '0.75rem',
+            paddingLeft: '0.5rem',
           }}
         >
-          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-light)' }}>
-            Wholesale Logistics
+          ACCOUNT
+        </div>
+
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {accountItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setCurrentTab(item.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.65rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  background: isActive ? 'var(--bg-active-pill)' : 'transparent',
+                  color: isActive ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'var(--transition)',
+                }}
+              >
+                <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Role Switcher & User Profile Pill at Bottom */}
+      <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-light)' }}>
+        <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+          SWITCH ROLE (DEMO)
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginBottom: '0.85rem' }}>
+          {demoRoles.map((r) => (
+            <button
+              key={r.role}
+              onClick={() => handleRoleSwitch(r.email, r.pass)}
+              style={{
+                background: user?.role === r.role ? '#eff6ff' : '#f8fafc',
+                border: user?.role === r.role ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                color: user?.role === r.role ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                borderRadius: '6px',
+                padding: '0.3rem 0.4rem',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                textAlign: 'center',
+              }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: '#e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#334155',
+              }}
+            >
+              {user?.name?.charAt(0) || 'U'}
+            </div>
+            <div style={{ lineHeight: 1.2 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>{user?.name?.split(' ')[0]}</div>
+              <div style={{ fontSize: '0.68rem', color: 'var(--primary-blue)', fontWeight: 600 }}>{user?.role}</div>
+            </div>
           </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-            Multi-tier inventory, auto challan sequencing & atomic stock guard.
-          </div>
+
+          <button
+            onClick={logout}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+            title="Sign out"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

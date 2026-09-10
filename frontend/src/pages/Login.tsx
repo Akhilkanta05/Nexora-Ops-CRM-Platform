@@ -39,7 +39,7 @@ export const Login: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: 'radial-gradient(ellipse at top, #1e1b4b 0%, #0b0f19 70%)',
+        background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

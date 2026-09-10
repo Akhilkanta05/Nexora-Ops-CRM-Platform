@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { Badge } from '../components/Badge';
 import { Modal } from '../components/Modal';
 import {
-  FileText,
-  Plus,
-  Search,
-  Filter,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
   Download,
   CheckCircle2,
   XCircle,
-  AlertCircle,
+  AlertTriangle,
+  Plus,
   Trash2,
-  PlusCircle,
+  ZoomIn,
+  ZoomOut,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  MoreVertical,
+  Check,
   Building2,
-  Calendar,
-  User,
-  ShoppingBag,
-  ExternalLink,
+  FileCheck2,
 } from 'lucide-react';
 
 export const Challans: React.FC = () => {
-  const { hasRole, user } = useAuth();
+  const { hasRole } = useAuth();
   const [challans, setChallans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const [selectedChallanId, setSelectedChallanId] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  // Create Challan Modal State
+  // Create Modal State
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [customersList, setCustomersList] = useState<any[]>([]);
   const [productsList, setProductsList] = useState<any[]>([]);
@@ -41,29 +43,25 @@ export const Challans: React.FC = () => {
   const [createError, setCreateError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Detail Modal State
-  const [selectedChallan, setSelectedChallan] = useState<any>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  // Status Action State
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchChallans(1);
-  }, [search, statusFilter]);
+    fetchChallans();
+  }, [statusFilter]);
 
-  const fetchChallans = async (page = 1) => {
+  const fetchChallans = async () => {
     try {
       setLoading(true);
       const res = await api.getChallans({
-        page,
-        limit: 10,
-        search,
+        limit: 50,
         status: statusFilter || undefined,
       });
-      if (res.success) {
-        setChallans(res.data || []);
-        if (res.pagination) {
-          setPagination(res.pagination);
+      if (res.success && res.data) {
+        setChallans(res.data);
+        if (res.data.length > 0 && !selectedChallanId) {
+          setSelectedChallanId(res.data[0].id);
         }
       }
     } catch (err) {
@@ -71,6 +69,13 @@ export const Challans: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectedChallan = challans.find((c) => c.id === selectedChallanId) || challans[0] || null;
+
+  const toggleExpand = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedItems((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const openCreateModal = async () => {
@@ -87,19 +92,6 @@ export const Challans: React.FC = () => {
       ]);
       if (custRes.success) setCustomersList(custRes.data || []);
       if (prodRes.success) setProductsList(prodRes.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const openDetail = async (id: string) => {
-    setActionError(null);
-    try {
-      const res = await api.getChallanById(id);
-      if (res.success) {
-        setSelectedChallan(res.data);
-        setDetailModalOpen(true);
-      }
     } catch (err) {
       console.error(err);
     }
@@ -127,18 +119,11 @@ export const Challans: React.FC = () => {
   };
 
   const calculateGrandTotal = () => {
-    return challanItems.reduce((sum, item) => {
-      return sum + calculateLineItemTotal(item.productId, item.quantity);
-    }, 0);
-  };
-
-  const calculateTotalQty = () => {
-    return challanItems.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+    return challanItems.reduce((sum, item) => sum + calculateLineItemTotal(item.productId, item.quantity), 0);
   };
 
   const handleCreateChallan = async (status: 'Draft' | 'Confirmed') => {
     setCreateError(null);
-
     if (!selectedCustomer) {
       setCreateError('Please select a customer for this challan.');
       return;
@@ -150,7 +135,6 @@ export const Challans: React.FC = () => {
       return;
     }
 
-    // Client-side pre-check for confirmed status
     if (status === 'Confirmed') {
       for (const item of validItems) {
         const prod = productsList.find((p) => p.id === item.productId);
@@ -165,7 +149,7 @@ export const Challans: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await api.createChallan({
+      const res = await api.createChallan({
         customerId: selectedCustomer,
         status,
         notes: challanNotes,
@@ -176,9 +160,12 @@ export const Challans: React.FC = () => {
       });
 
       setCreateModalOpen(false);
-      fetchChallans(1);
+      await fetchChallans();
+      if (res.data?.id) {
+        setSelectedChallanId(res.data.id);
+      }
     } catch (err: any) {
-      setCreateError(err.message || 'Failed to create sales challan');
+      setCreateError(err.message || 'Failed to create challan');
     } finally {
       setSubmitting(false);
     }
@@ -191,11 +178,10 @@ export const Challans: React.FC = () => {
     try {
       const res = await api.updateChallanStatus(selectedChallan.id, newStatus);
       if (res.success) {
-        setSelectedChallan(res.data);
-        fetchChallans(pagination.page);
+        await fetchChallans();
       }
     } catch (err: any) {
-      setActionError(err.message || `Failed to update challan to ${newStatus}`);
+      setActionError(err.message || `Failed to update status to ${newStatus}`);
     } finally {
       setActionLoading(false);
     }
@@ -209,206 +195,428 @@ export const Challans: React.FC = () => {
     }
   };
 
+  const customerSnap = selectedChallan ? getParsedSnapshot(selectedChallan.customerSnapshot) : {};
+
   return (
-    <div className="page-wrapper">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>Sales Challans & Dispatch</h1>
-          <p>Create multi-item delivery challans with automated numbering, snapshots & atomic stock deductions.</p>
-        </div>
+    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+      {/* Middle Column: Master Feed of Challans / Bills */}
+      <section className="col-master" style={{ padding: '1.75rem 1.25rem' }}>
+        {/* Top Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a' }}>Bills</h1>
 
-        {hasRole('SALES') && (
-          <button className="btn btn-primary" onClick={openCreateModal}>
-            <Plus size={16} /> New Sales Challan
-          </button>
-        )}
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '0.45rem 0.75rem',
+                fontSize: '0.8rem',
+                color: '#475569',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              <option value="">All states</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Draft">Draft</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
 
-      {/* Filter Bar */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem 1.25rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem' }}>
-          {/* Search */}
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              className="form-input"
-              style={{ paddingLeft: '2.5rem' }}
-              placeholder="Search by challan number (e.g. CH-2026...) or customer name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Search size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          </div>
-
-          {/* Status Filter */}
-          <select
-            className="form-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Challan Statuses</option>
-            <option value="Confirmed">Confirmed (Stock Deducted)</option>
-            <option value="Draft">Draft (Pending Approval)</option>
-            <option value="Cancelled">Cancelled (Stock Reverted)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Challans Table */}
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Challan Number</th>
-              <th>Customer & Business</th>
-              <th>Items & Qty</th>
-              <th>Total Amount (INR)</th>
-              <th>Status</th>
-              <th>Created By</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '3rem' }}>
-                  <span className="loading-spinner" />
-                  <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)' }}>Loading sales challans...</div>
-                </td>
-              </tr>
-            ) : challans.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="empty-state">
-                  No sales challans found.
-                </td>
-              </tr>
-            ) : (
-              challans.map((ch) => (
-                <tr key={ch.id} style={{ cursor: 'pointer' }} onClick={() => openDetail(ch.id)}>
-                  <td>
-                    <div style={{ fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--accent-light)' }}>
-                      {ch.challanNumber}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {new Date(ch.createdAt).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                      {ch.customer?.name}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {ch.customer?.businessName}
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{ch.totalQuantity} units</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      {ch.items?.length || 0} product line(s)
-                    </div>
-                  </td>
-                  <td>
-                    <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>
-                      ₹{Number(ch.totalAmount).toLocaleString('en-IN')}
-                    </span>
-                  </td>
-                  <td>
-                    <Badge type="status" value={ch.status} />
-                  </td>
-                  <td>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                      {ch.createdByName}
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.35rem' }} onClick={(e) => e.stopPropagation()}>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => openDetail(ch.id)}
-                        title="View Full Challan Details"
-                      >
-                        View
-                      </button>
-                      <a
-                        href={api.downloadPdfUrl(ch.id)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-secondary btn-sm"
-                        title="Download Invoice PDF"
-                      >
-                        <Download size={13} /> PDF
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              ))
+            {hasRole('SALES') && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={openCreateModal}
+                style={{ borderRadius: '8px', padding: '0.45rem 0.8rem' }}
+              >
+                <Plus size={15} /> New
+              </button>
             )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Bar */}
-      {pagination.totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Showing page {pagination.page} of {pagination.totalPages} ({pagination.total} total challans)
-          </span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              disabled={pagination.page <= 1}
-              onClick={() => fetchChallans(pagination.page - 1)}
-            >
-              Previous
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => fetchChallans(pagination.page + 1)}
-            >
-              Next
-            </button>
           </div>
         </div>
-      )}
 
-      {/* Create Challan Multi-Product Modal */}
+        {/* Sub-header Filter */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+          <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
+            All bills ({challans.length})
+          </span>
+          <ChevronDown size={16} color="#94a3b8" />
+        </div>
+
+        {/* Card Feed */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem' }}>
+              <span className="loading-spinner" />
+            </div>
+          ) : challans.length === 0 ? (
+            <div className="empty-state">No bills or challans found.</div>
+          ) : (
+            challans.map((ch) => {
+              const isSelected = selectedChallanId === ch.id;
+              const isExpanded = !!expandedItems[ch.id];
+              const snap = getParsedSnapshot(ch.customerSnapshot);
+
+              let badgeClass = 'status-pill status-active';
+              let badgeLabel = 'Active';
+              if (ch.status === 'Confirmed') {
+                badgeClass = 'status-pill status-confirmed';
+                badgeLabel = 'Active';
+              } else if (ch.status === 'Cancelled') {
+                badgeClass = 'status-pill status-cancelled';
+                badgeLabel = 'Cancelled';
+              } else if (ch.status === 'Draft') {
+                badgeClass = 'status-pill status-draft';
+                badgeLabel = 'Draft';
+              }
+
+              return (
+                <div
+                  key={ch.id}
+                  onClick={() => setSelectedChallanId(ch.id)}
+                  className={`feed-card ${isSelected ? 'selected' : ''}`}
+                >
+                  {/* Card Header Row */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      {/* Checkbox */}
+                      <div
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          borderRadius: '4px',
+                          border: isSelected ? 'none' : '1.5px solid #cbd5e1',
+                          background: isSelected ? 'var(--primary-blue)' : '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#ffffff',
+                        }}
+                      >
+                        {isSelected && <Check size={13} strokeWidth={3} />}
+                      </div>
+
+                      <span style={{ fontWeight: 800, fontSize: '0.925rem', color: '#0f172a' }}>
+                        {ch.challanNumber}
+                      </span>
+
+                      <span className={badgeClass}>{badgeLabel}</span>
+                    </div>
+
+                    <a
+                      href={api.downloadPdfUrl(ch.id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ color: '#94a3b8', padding: '2px' }}
+                      title="Open PDF Document"
+                    >
+                      <ExternalLink size={16} />
+                    </a>
+                  </div>
+
+                  {/* Card Metadata Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '85px 1fr', gap: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+                    <span style={{ color: '#94a3b8' }}>Balance:</span>
+                    <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                      ₹{Number(ch.totalAmount).toLocaleString('en-IN')}{' '}
+                      <span style={{ color: '#94a3b8', fontWeight: 400 }}>/ {ch.totalQuantity} units</span>
+                    </span>
+
+                    <span style={{ color: '#94a3b8' }}>Requestor:</span>
+                    <span style={{ color: '#334155', fontWeight: 500 }}>
+                      {snap.name || ch.customer?.name}
+                    </span>
+
+                    <span style={{ color: '#94a3b8' }}>Date:</span>
+                    <span style={{ color: 'var(--primary-blue)', textDecoration: 'underline', fontWeight: 500 }}>
+                      {new Date(ch.createdAt).toLocaleDateString('en-GB')}
+                    </span>
+
+                    <span style={{ color: '#94a3b8' }}>Description:</span>
+                    <span style={{ color: '#64748b', fontSize: '0.78rem' }}>
+                      {ch.notes || `${snap.businessName || ch.customer?.businessName || 'Wholesale Order'} (#${ch.challanNumber.slice(-4)})`}
+                    </span>
+                  </div>
+
+                  {/* Show Items Toggle */}
+                  <div
+                    onClick={(e) => toggleExpand(ch.id, e)}
+                    style={{
+                      marginTop: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      fontSize: '0.78rem',
+                      color: 'var(--primary-blue)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span>{isExpanded ? 'Hide items' : 'Show items'}</span>
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </div>
+
+                  {/* Collapsible Line Items */}
+                  {isExpanded && (
+                    <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed #e2e8f0', fontSize: '0.75rem' }}>
+                      {ch.items?.map((item: any) => (
+                        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                          <span style={{ color: '#334155' }}>{item.productName} (x{item.quantity})</span>
+                          <span style={{ fontWeight: 600 }}>₹{Number(item.totalPrice).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      {/* Right Column: Live Document Sheet / Invoice Preview */}
+      <main className="col-detail">
+        {selectedChallan ? (
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+            {actionError && (
+              <div
+                style={{
+                  margin: '1.5rem 1.5rem 0 1.5rem',
+                  background: 'var(--danger-bg)',
+                  border: '1px solid var(--danger-border)',
+                  color: 'var(--danger)',
+                  padding: '0.85rem 1.25rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.85rem',
+                }}
+              >
+                {actionError}
+              </div>
+            )}
+
+            {/* Document Paper Sheet */}
+            <div className="document-sheet">
+              {/* Document Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
+                  Invoice #{selectedChallan.challanNumber.replace('CH-', 'TRT')} ({selectedChallan.challanNumber})
+                </h2>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <a
+                    href={api.downloadPdfUrl(selectedChallan.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-secondary btn-sm"
+                    style={{ borderRadius: '8px' }}
+                  >
+                    <Download size={14} /> Download PDF
+                  </a>
+
+                  {selectedChallan.status === 'Draft' && hasRole('SALES', 'WAREHOUSE') && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={actionLoading}
+                      onClick={() => handleStatusUpdate('Confirmed')}
+                    >
+                      <CheckCircle2 size={14} /> Confirm & Deduct Stock
+                    </button>
+                  )}
+
+                  {selectedChallan.status === 'Confirmed' && hasRole('SALES', 'WAREHOUSE') && (
+                    <button
+                      className="btn btn-danger-outline btn-sm"
+                      disabled={actionLoading}
+                      onClick={() => handleStatusUpdate('Cancelled')}
+                    >
+                      <XCircle size={14} /> Cancel & Return Stock
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Addresses: Bill From & Bill To */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1.75rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.35rem' }}>Bill from:</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                    Warehouse Logistics Hub
+                  </div>
+                  <div style={{ fontSize: '0.825rem', color: '#64748b', marginTop: '0.2rem', lineHeight: 1.4 }}>
+                    Central Distribution Bay A-01, Industrial Corridor,<br />
+                    Mumbai, Maharashtra 400072
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.35rem' }}>Bill to:</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                    {customerSnap.name || selectedChallan.customer?.name}
+                  </div>
+                  <div style={{ fontSize: '0.825rem', color: '#64748b', marginTop: '0.2rem', lineHeight: 1.4 }}>
+                    {customerSnap.businessName || selectedChallan.customer?.businessName}<br />
+                    {customerSnap.address || selectedChallan.customer?.address}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>Issued on:</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.925rem', color: '#0f172a' }}>
+                    {new Date(selectedChallan.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.2rem' }}>Due on:</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.925rem', color: '#0f172a' }}>
+                    {new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoice Detail Section */}
+              <div style={{ marginBottom: '1.75rem' }}>
+                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '0.75rem' }}>Invoice detail</div>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <th style={{ padding: '0.6rem 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>Description</th>
+                      <th style={{ padding: '0.6rem 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textAlign: 'right' }}>Price</th>
+                      <th style={{ padding: '0.6rem 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textAlign: 'center' }}>Qty</th>
+                      <th style={{ padding: '0.6rem 0', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600, textAlign: 'right' }}>Total Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedChallan.items?.map((item: any) => (
+                      <tr key={item.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                        <td style={{ padding: '0.85rem 0', fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>
+                          {item.productName}
+                          <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
+                            SKU: {item.sku}
+                          </div>
+                        </td>
+                        <td style={{ padding: '0.85rem 0', fontSize: '0.875rem', textAlign: 'right', color: '#334155' }}>
+                          ₹{Number(item.unitPrice).toFixed(2)}
+                        </td>
+                        <td style={{ padding: '0.85rem 0', fontSize: '0.875rem', textAlign: 'center', color: '#334155', fontWeight: 600 }}>
+                          {item.quantity}
+                        </td>
+                        <td style={{ padding: '0.85rem 0', fontSize: '0.875rem', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
+                          ₹{Number(item.totalPrice).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Grand Total */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
+                <span style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>Grand Total</span>
+                <span style={{ fontWeight: 800, fontSize: '1.4rem', color: '#0f172a' }}>
+                  ₹{Number(selectedChallan.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+
+              {/* Notice Callout Box */}
+              <div className="callout-box">
+                <AlertTriangle size={18} color="#d97706" style={{ flexShrink: 0 }} />
+                <span>
+                  {selectedChallan.status === 'Confirmed'
+                    ? 'The warehouse inventory stock was atomically deducted upon confirmation. Dispatched to destination.'
+                    : 'The customer will receive a formal delivery challan and tax invoice upon status confirmation.'}
+                </span>
+              </div>
+
+              {/* Footer Bank & Tax Details */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.5 }}>
+                <div>
+                  <strong style={{ color: '#64748b' }}>Operations Distribution Hub</strong><br />
+                  Plot 14, Commercial District, Western Hub, MH 400072<br />
+                  GSTIN: 27AABCF1234F1Z8 | PAN: AABCF1234F
+                </div>
+                <div>
+                  <strong style={{ color: '#64748b' }}>Settlement & Banking:</strong><br />
+                  HDFC Bank Commercial Banking, Nariman Point<br />
+                  A/C: 50200012345678 | IFSC: HDFC0000123
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Document Viewer Toolbar */}
+            <div className="doc-toolbar">
+              <button className="btn btn-secondary btn-sm" title="Zoom out">
+                <ZoomOut size={15} />
+              </button>
+              <button className="btn btn-secondary btn-sm" title="Zoom in">
+                <ZoomIn size={15} />
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0.5rem' }}>
+                <button className="btn btn-secondary btn-sm" disabled style={{ padding: '0.35rem 0.5rem' }}>
+                  <ChevronLeft size={15} />
+                </button>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>1 / 1</span>
+                <button className="btn btn-secondary btn-sm" disabled style={{ padding: '0.35rem 0.5rem' }}>
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+
+              <button className="btn btn-secondary btn-sm" title="Fit to screen">
+                <Maximize2 size={15} />
+              </button>
+
+              <button className="btn btn-secondary btn-sm" title="More options">
+                <MoreVertical size={15} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="empty-state" style={{ margin: 'auto' }}>
+            Select a bill or challan from the list to preview document details.
+          </div>
+        )}
+      </main>
+
+      {/* New Challan Builder Modal */}
       <Modal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        title="Create New Sales Delivery Challan"
-        maxWidth="780px"
+        title="Create New Delivery Challan / Bill"
+        maxWidth="750px"
       >
         {createError && (
           <div
             style={{
               background: 'var(--danger-bg)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              border: '1px solid var(--danger-border)',
               padding: '0.85rem',
-              borderRadius: 'var(--radius-sm)',
-              color: '#f87171',
+              borderRadius: '8px',
+              color: 'var(--danger)',
               fontSize: '0.85rem',
               marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
+              whiteSpace: 'pre-wrap',
             }}
           >
-            <AlertCircle size={18} style={{ flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'pre-wrap' }}>{createError}</span>
+            {createError}
           </div>
         )}
 
         <div>
-          {/* Customer Selection */}
           <div className="form-group">
-            <label className="form-label">Select Customer / Delivery Destination *</label>
+            <label className="form-label">Select Customer Destination *</label>
             <select
               className="form-select"
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
-              required
             >
               <option value="">-- Choose Customer Account --</option>
               {customersList.map((c) => (
@@ -419,18 +627,11 @@ export const Challans: React.FC = () => {
             </select>
           </div>
 
-          {/* Dynamic Multi-product Builder */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <label className="form-label" style={{ marginBottom: 0 }}>
-                Challan Product Line Items *
-              </label>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handleAddItemRow}
-              >
-                <PlusCircle size={14} /> Add Product Item
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label className="form-label" style={{ marginBottom: 0 }}>Product Items *</label>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddItemRow}>
+                <Plus size={13} /> Add Product
               </button>
             </div>
 
@@ -448,20 +649,19 @@ export const Challans: React.FC = () => {
                       gridTemplateColumns: '2.5fr 1fr 1fr auto',
                       gap: '0.75rem',
                       alignItems: 'center',
-                      background: 'var(--bg-main)',
+                      background: '#f8fafc',
                       padding: '0.75rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: isOverStock ? '1px solid var(--danger)' : '1px solid var(--border-subtle)',
+                      borderRadius: '8px',
+                      border: isOverStock ? '1px solid #ef4444' : '1px solid #e2e8f0',
                     }}
                   >
-                    {/* Product Dropdown */}
                     <div>
                       <select
                         className="form-select"
                         value={item.productId}
                         onChange={(e) => handleItemChange(index, 'productId', e.target.value)}
                       >
-                        <option value="">-- Select SKU / Product --</option>
+                        <option value="">-- Select SKU --</option>
                         {productsList.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.name} (SKU: {p.sku}) — Stock: {p.currentStock}
@@ -469,13 +669,12 @@ export const Challans: React.FC = () => {
                         ))}
                       </select>
                       {selectedProd && (
-                        <div style={{ fontSize: '0.72rem', marginTop: '0.25rem', color: isOverStock ? '#f87171' : 'var(--text-muted)' }}>
-                          Available: <strong>{selectedProd.currentStock} units</strong> @ ₹{selectedProd.unitPrice}/unit
+                        <div style={{ fontSize: '0.72rem', marginTop: '0.2rem', color: isOverStock ? '#ef4444' : '#64748b' }}>
+                          Available: <strong>{selectedProd.currentStock} units</strong> @ ₹{selectedProd.unitPrice}
                         </div>
                       )}
                     </div>
 
-                    {/* Quantity Input */}
                     <div>
                       <input
                         type="number"
@@ -485,27 +684,19 @@ export const Challans: React.FC = () => {
                         value={item.quantity}
                         onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value, 10) || 1)}
                       />
-                      {isOverStock && (
-                        <div style={{ fontSize: '0.68rem', color: '#f87171', marginTop: '0.2rem' }}>
-                          Exceeds stock!
-                        </div>
-                      )}
                     </div>
 
-                    {/* Line Total */}
-                    <div style={{ textAlign: 'right', fontWeight: 700, fontSize: '0.9rem' }}>
+                    <div style={{ textAlign: 'right', fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
                       ₹{lineTotal.toLocaleString('en-IN')}
                     </div>
 
-                    {/* Delete Item Row */}
                     <button
                       type="button"
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-secondary btn-sm"
                       onClick={() => handleRemoveItemRow(index)}
                       disabled={challanItems.length === 1}
-                      title="Remove Item"
                     >
-                      <Trash2 size={15} color={challanItems.length === 1 ? 'var(--text-muted)' : 'var(--danger)'} />
+                      <Trash2 size={14} color={challanItems.length === 1 ? '#94a3b8' : '#ef4444'} />
                     </button>
                   </div>
                 );
@@ -513,270 +704,56 @@ export const Challans: React.FC = () => {
             </div>
           </div>
 
-          {/* Totals Summary */}
           <div
             style={{
-              background: 'rgba(99, 102, 241, 0.08)',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1rem',
+              background: '#f1f5f9',
+              borderRadius: '8px',
+              padding: '0.85rem 1rem',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               marginBottom: '1rem',
             }}
           >
-            <div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Items Quantity</span>
-              <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{calculateTotalQty()} units</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Grand Invoice Total</span>
-              <div style={{ fontWeight: 800, fontSize: '1.35rem', color: 'var(--accent-light)' }}>
-                ₹{calculateGrandTotal().toLocaleString('en-IN')}
-              </div>
-            </div>
+            <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Total Order Value:</span>
+            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+              ₹{calculateGrandTotal().toLocaleString('en-IN')}
+            </span>
           </div>
 
-          {/* Notes */}
           <div className="form-group">
-            <label className="form-label">Dispatch / Order Notes</label>
+            <label className="form-label">Dispatch Notes</label>
             <input
               type="text"
               className="form-input"
-              placeholder="e.g. Dispatched through Express Cargo. Gate pass #9914."
+              placeholder="e.g. Dispatched via express cargo shipment"
               value={challanNotes}
               onChange={(e) => setChallanNotes(e.target.value)}
             />
           </div>
 
-          {/* Actions */}
-          <div className="modal-footer" style={{ padding: '1rem 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              * Confirming immediately validates & reduces inventory atomically.
-            </span>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                disabled={submitting}
-                onClick={() => handleCreateChallan('Draft')}
-              >
-                Save as Draft
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                disabled={submitting}
-                onClick={() => handleCreateChallan('Confirmed')}
-              >
-                {submitting ? 'Processing...' : 'Confirm & Dispatch'}
-              </button>
-            </div>
+          <div className="modal-footer" style={{ padding: '1rem 0 0 0' }}>
+            <button type="button" className="btn btn-secondary" onClick={() => setCreateModalOpen(false)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={submitting}
+              onClick={() => handleCreateChallan('Draft')}
+            >
+              Save as Draft
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={submitting}
+              onClick={() => handleCreateChallan('Confirmed')}
+            >
+              {submitting ? 'Confirming...' : 'Confirm & Dispatch'}
+            </button>
           </div>
         </div>
-      </Modal>
-
-      {/* Challan Detail & PDF Modal */}
-      <Modal
-        isOpen={detailModalOpen}
-        onClose={() => {
-          setDetailModalOpen(false);
-          setSelectedChallan(null);
-        }}
-        title={`Challan: ${selectedChallan?.challanNumber || ''}`}
-        maxWidth="750px"
-      >
-        {selectedChallan && (
-          <div>
-            {actionError && (
-              <div
-                style={{
-                  background: 'var(--danger-bg)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  padding: '0.85rem',
-                  borderRadius: 'var(--radius-sm)',
-                  color: '#f87171',
-                  fontSize: '0.85rem',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <AlertCircle size={18} style={{ flexShrink: 0 }} />
-                <span style={{ whiteSpace: 'pre-wrap' }}>{actionError}</span>
-              </div>
-            )}
-
-            {/* Metadata bar */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '1rem',
-                background: 'var(--bg-main)',
-                borderRadius: 'var(--radius-md)',
-                marginBottom: '1rem',
-                border: '1px solid var(--border-subtle)',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>STATUS</div>
-                <div style={{ marginTop: '0.2rem' }}>
-                  <Badge type="status" value={selectedChallan.status} />
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>GENERATED DATE</div>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                  {new Date(selectedChallan.createdAt).toLocaleDateString()}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CREATED BY</div>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>
-                  {selectedChallan.createdByName}
-                </div>
-              </div>
-              <div>
-                <a
-                  href={api.downloadPdfUrl(selectedChallan.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-secondary btn-sm"
-                >
-                  <Download size={14} /> Download PDF
-                </a>
-              </div>
-            </div>
-
-            {/* Customer Snapshot Card */}
-            {(() => {
-              const snap = getParsedSnapshot(selectedChallan.customerSnapshot);
-              return (
-                <div
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    padding: '1rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border-subtle)',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                    Customer Snapshot (At Generation)
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <div><strong>Customer:</strong> {snap.name || selectedChallan.customer?.name}</div>
-                    <div><strong>Business:</strong> {snap.businessName || selectedChallan.customer?.businessName}</div>
-                    <div><strong>Contact:</strong> {snap.mobile || selectedChallan.customer?.mobile}</div>
-                    <div><strong>GSTIN:</strong> {snap.gstNumber || 'N/A'}</div>
-                    <div style={{ gridColumn: '1 / -1' }}><strong>Delivery Address:</strong> {snap.address || selectedChallan.customer?.address}</div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Line Items Snapshot Table */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                Product Items Snapshot
-              </div>
-              <div className="table-container">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Product Description</th>
-                      <th>SKU</th>
-                      <th>Unit Price</th>
-                      <th>Qty</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedChallan.items?.map((item: any) => (
-                      <tr key={item.id}>
-                        <td style={{ fontWeight: 600 }}>{item.productName}</td>
-                        <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}>{item.sku}</td>
-                        <td>₹{Number(item.unitPrice).toFixed(2)}</td>
-                        <td style={{ fontWeight: 700 }}>{item.quantity}</td>
-                        <td style={{ fontWeight: 700 }}>₹{Number(item.totalPrice).toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Summary Row */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '2rem', marginBottom: '1.5rem', padding: '0.5rem 1rem' }}>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Units: </span>
-                <strong>{selectedChallan.totalQuantity}</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Grand Total: </span>
-                <strong style={{ fontSize: '1.15rem', color: 'var(--accent-light)' }}>
-                  ₹{Number(selectedChallan.totalAmount).toLocaleString('en-IN')}
-                </strong>
-              </div>
-            </div>
-
-            {selectedChallan.notes && (
-              <div style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', background: 'var(--bg-main)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-                <strong>Notes:</strong> {selectedChallan.notes}
-              </div>
-            )}
-
-            {/* Status Change Actions */}
-            <div className="modal-footer" style={{ padding: '1rem 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                {selectedChallan.status === 'Draft' && (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>
-                    Draft challan has not reduced warehouse stock yet.
-                  </span>
-                )}
-                {selectedChallan.status === 'Confirmed' && (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>
-                    Confirmed: Stock deducted and logged in audit history.
-                  </span>
-                )}
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                {selectedChallan.status === 'Draft' && hasRole('SALES', 'WAREHOUSE') && (
-                  <button
-                    className="btn btn-success"
-                    disabled={actionLoading}
-                    onClick={() => handleStatusUpdate('Confirmed')}
-                  >
-                    <CheckCircle2 size={16} /> Confirm & Deduct Stock
-                  </button>
-                )}
-
-                {selectedChallan.status === 'Confirmed' && hasRole('SALES', 'WAREHOUSE') && (
-                  <button
-                    className="btn btn-danger"
-                    disabled={actionLoading}
-                    onClick={() => handleStatusUpdate('Cancelled')}
-                  >
-                    <XCircle size={16} /> Cancel Challan & Return Stock
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setDetailModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </Modal>
     </div>
   );
