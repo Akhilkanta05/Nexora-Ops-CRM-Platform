@@ -46,11 +46,23 @@ export const App: React.FC = () => {
       <div className="main-content">
         <Navbar />
 
-        <main style={{ flex: 1 }}>
-          {currentTab === 'dashboard' && <Dashboard onNavigate={setCurrentTab} />}
+        <main className="main-viewport" key={currentTab}>
+          {currentTab === 'dashboard' && (
+            <div className="page-scrollable">
+              <Dashboard onNavigate={setCurrentTab} />
+            </div>
+          )}
           {currentTab === 'customers' && <Customers />}
-          {currentTab === 'products' && <Products />}
-          {currentTab === 'stock-logs' && <StockLogs />}
+          {currentTab === 'products' && (
+            <div className="page-scrollable">
+              <Products />
+            </div>
+          )}
+          {currentTab === 'stock-logs' && (
+            <div className="page-scrollable">
+              <StockLogs />
+            </div>
+          )}
           {currentTab === 'challans' && <Challans />}
         </main>
       </div>

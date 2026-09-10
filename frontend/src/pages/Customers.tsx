@@ -170,7 +170,7 @@ export const Customers: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+    <div className="master-detail-layout">
       {/* Middle Column: Customers Master List */}
       <section className="col-master" style={{ padding: '1.75rem 1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
@@ -320,7 +320,7 @@ export const Customers: React.FC = () => {
             <span className="loading-spinner" />
           </div>
         ) : customerDetail ? (
-          <div className="document-sheet">
+          <div className="document-sheet" key={customerDetail.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>

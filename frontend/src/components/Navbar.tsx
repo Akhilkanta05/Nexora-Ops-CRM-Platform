@@ -27,7 +27,9 @@ export const Navbar: React.FC = () => {
   return (
     <header
       style={{
-        height: '68px',
+        height: '64px',
+        minHeight: '64px',
+        flexShrink: 0,
         background: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border-subtle)',
         display: 'flex',
@@ -76,17 +78,7 @@ export const Navbar: React.FC = () => {
               key={d.role}
               onClick={() => handleQuickSwitch(d.email, d.pass)}
               disabled={switching || user?.role === d.role}
-              style={{
-                background: user?.role === d.role ? 'var(--accent-primary)' : 'transparent',
-                color: user?.role === d.role ? '#fff' : 'var(--text-secondary)',
-                border: 'none',
-                borderRadius: 'var(--radius-full)',
-                padding: '0.2rem 0.6rem',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                cursor: user?.role === d.role ? 'default' : 'pointer',
-                transition: 'var(--transition)',
-              }}
+              className={`role-pill-btn ${user?.role === d.role ? 'active' : ''}`}
               title={`Switch session to ${d.label} role`}
             >
               {d.label}

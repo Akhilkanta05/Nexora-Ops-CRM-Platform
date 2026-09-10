@@ -113,21 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
               <button
                 key={item.id}
                 onClick={() => setCurrentTab(item.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.65rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: 'none',
-                  background: isActive ? 'var(--bg-active-pill)' : 'transparent',
-                  color: isActive ? 'var(--primary-blue)' : 'var(--text-secondary)',
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'var(--transition)',
-                }}
+                className={`nav-item-btn ${isActive ? 'active' : ''}`}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
@@ -181,24 +167,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
               <button
                 key={item.id}
                 onClick={() => setCurrentTab(item.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.65rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: 'none',
-                  background: isActive ? 'var(--bg-active-pill)' : 'transparent',
-                  color: isActive ? 'var(--primary-blue)' : 'var(--text-secondary)',
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'var(--transition)',
-                }}
+                className={`nav-item-btn ${isActive ? 'active' : ''}`}
               >
-                <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
-                <span>{item.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Icon size={18} color={isActive ? 'var(--primary-blue)' : '#64748b'} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <span>{item.label}</span>
+                </div>
               </button>
             );
           })}
@@ -211,25 +185,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, cou
           SWITCH ROLE (DEMO)
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.35rem', marginBottom: '0.85rem' }}>
-          {demoRoles.map((r) => (
-            <button
-              key={r.role}
-              onClick={() => handleRoleSwitch(r.email, r.pass)}
-              style={{
-                background: user?.role === r.role ? '#eff6ff' : '#f8fafc',
-                border: user?.role === r.role ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
-                color: user?.role === r.role ? 'var(--primary-blue)' : 'var(--text-secondary)',
-                borderRadius: '6px',
-                padding: '0.3rem 0.4rem',
-                fontSize: '0.68rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                textAlign: 'center',
-              }}
-            >
-              {r.label}
-            </button>
-          ))}
+          {demoRoles.map((r) => {
+            const isCurrent = user?.role === r.role;
+            return (
+              <button
+                key={r.role}
+                onClick={() => handleRoleSwitch(r.email, r.pass)}
+                style={{
+                  background: isCurrent ? '#eff6ff' : '#f8fafc',
+                  border: isCurrent ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                  color: isCurrent ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                  borderRadius: '6px',
+                  padding: '0.35rem 0.4rem',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  cursor: isCurrent ? 'default' : 'pointer',
+                  textAlign: 'center',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {r.label}
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

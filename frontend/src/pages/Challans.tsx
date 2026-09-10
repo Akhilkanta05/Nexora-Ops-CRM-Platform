@@ -198,7 +198,7 @@ export const Challans: React.FC = () => {
   const customerSnap = selectedChallan ? getParsedSnapshot(selectedChallan.customerSnapshot) : {};
 
   return (
-    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
+    <div className="master-detail-layout">
       {/* Middle Column: Master Feed of Challans / Bills */}
       <section className="col-master" style={{ padding: '1.75rem 1.25rem' }}>
         {/* Top Header */}
@@ -399,7 +399,7 @@ export const Challans: React.FC = () => {
             )}
 
             {/* Document Paper Sheet */}
-            <div className="document-sheet">
+            <div className="document-sheet" key={selectedChallan.id}>
               {/* Document Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
