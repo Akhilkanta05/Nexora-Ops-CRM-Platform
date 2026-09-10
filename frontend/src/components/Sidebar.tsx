@@ -63,10 +63,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
         </div>
         <div>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-            FUNSROOMS
+            MINI ERP + CRM
           </h2>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-            Mini ERP + CRM
+            Operations Portal
           </span>
         </div>
       </div>

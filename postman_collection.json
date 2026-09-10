@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "FUNSROOMS Mini ERP + CRM Operations API",
+    "name": "Mini ERP + CRM Operations API",
     "description": "Comprehensive Postman collection for testing Authentication, RBAC, Customer CRM, Products & Inventory, Stock Movements, and Sales Challans with atomic stock deduction and PDF export.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -42,7 +42,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@funsrooms.com\",\n  \"password\": \"Admin@123\"\n}"
+              "raw": "{\n  \"email\": \"admin@company.com\",\n  \"password\": \"Admin@123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
           }
@@ -54,7 +54,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"sales@funsrooms.com\",\n  \"password\": \"Sales@123\"\n}"
+              "raw": "{\n  \"email\": \"sales@company.com\",\n  \"password\": \"Sales@123\"\n}"
             },
             "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
           }

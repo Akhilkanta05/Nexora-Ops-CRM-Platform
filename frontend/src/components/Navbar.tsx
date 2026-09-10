@@ -7,10 +7,10 @@ export const Navbar: React.FC = () => {
   const [switching, setSwitching] = useState(false);
 
   const demoUsers = [
-    { role: 'ADMIN', email: 'admin@funsrooms.com', pass: 'Admin@123', label: 'Admin' },
-    { role: 'SALES', email: 'sales@funsrooms.com', pass: 'Sales@123', label: 'Sales' },
-    { role: 'WAREHOUSE', email: 'warehouse@funsrooms.com', pass: 'Warehouse@123', label: 'Warehouse' },
-    { role: 'ACCOUNTS', email: 'accounts@funsrooms.com', pass: 'Accounts@123', label: 'Accounts' },
+    { role: 'ADMIN', email: 'admin@company.com', pass: 'Admin@123', label: 'Admin' },
+    { role: 'SALES', email: 'sales@company.com', pass: 'Sales@123', label: 'Sales' },
+    { role: 'WAREHOUSE', email: 'warehouse@company.com', pass: 'Warehouse@123', label: 'Warehouse' },
+    { role: 'ACCOUNTS', email: 'accounts@company.com', pass: 'Accounts@123', label: 'Accounts' },
   ];
 
   const handleQuickSwitch = async (email: string, pass: string) => {

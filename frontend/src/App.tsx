@@ -27,7 +27,7 @@ export const App: React.FC = () => {
       >
         <span className="loading-spinner" style={{ width: '36px', height: '36px' }} />
         <p style={{ marginTop: '1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Initializing FUNSROOMS Enterprise Session...
+          Initializing Operations Enterprise Session...
         </p>
       </div>
     );

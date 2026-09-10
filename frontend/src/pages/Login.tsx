@@ -10,10 +10,10 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const demoAccounts = [
-    { role: 'ADMIN', email: 'admin@funsrooms.com', pass: 'Admin@123', desc: 'Full access to all modules and configurations' },
-    { role: 'SALES', email: 'sales@funsrooms.com', pass: 'Sales@123', desc: 'Customer CRM, follow-ups & Challan generation' },
-    { role: 'WAREHOUSE', email: 'warehouse@funsrooms.com', pass: 'Warehouse@123', desc: 'Stock intake, manual adjustments & audit logs' },
-    { role: 'ACCOUNTS', email: 'accounts@funsrooms.com', pass: 'Accounts@123', desc: 'Invoices, financial reports & PDF downloads' },
+    { role: 'ADMIN', email: 'admin@company.com', pass: 'Admin@123', desc: 'Full access to all modules and configurations' },
+    { role: 'SALES', email: 'sales@company.com', pass: 'Sales@123', desc: 'Customer CRM, follow-ups & Challan generation' },
+    { role: 'WAREHOUSE', email: 'warehouse@company.com', pass: 'Warehouse@123', desc: 'Stock intake, manual adjustments & audit logs' },
+    { role: 'ACCOUNTS', email: 'accounts@company.com', pass: 'Accounts@123', desc: 'Invoices, financial reports & PDF downloads' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,8 +66,8 @@ export const Login: React.FC = () => {
               <Boxes size={28} />
             </div>
             <div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>FUNSROOMS</h1>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Mini ERP + CRM Operations Portal</p>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>MINI ERP + CRM</h1>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Operations & Distribution Portal</p>
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export const Login: React.FC = () => {
                   type="email"
                   className="form-input"
                   style={{ paddingLeft: '2.5rem' }}
-                  placeholder="name@funsrooms.com"
+                  placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

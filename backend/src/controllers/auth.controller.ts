@@ -92,10 +92,10 @@ export class AuthController {
     return res.status(200).json({
       success: true,
       data: [
-        { role: 'ADMIN', email: 'admin@funsrooms.com', password: 'Admin@123', label: 'Admin (Full System Access)' },
-        { role: 'SALES', email: 'sales@funsrooms.com', password: 'Sales@123', label: 'Sales User (CRM & Challans)' },
-        { role: 'WAREHOUSE', email: 'warehouse@funsrooms.com', password: 'Warehouse@123', label: 'Warehouse (Stock & Movements)' },
-        { role: 'ACCOUNTS', email: 'accounts@funsrooms.com', password: 'Accounts@123', label: 'Accounts (Invoices & Totals)' },
+        { role: 'ADMIN', email: 'admin@company.com', password: 'Admin@123', label: 'Admin (Full System Access)' },
+        { role: 'SALES', email: 'sales@company.com', password: 'Sales@123', label: 'Sales User (CRM & Challans)' },
+        { role: 'WAREHOUSE', email: 'warehouse@company.com', password: 'Warehouse@123', label: 'Warehouse (Stock & Movements)' },
+        { role: 'ACCOUNTS', email: 'accounts@company.com', password: 'Accounts@123', label: 'Accounts (Invoices & Totals)' },
       ],
     });
   }
