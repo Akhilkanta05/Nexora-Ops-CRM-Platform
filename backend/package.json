@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "db:setup": "prisma generate && prisma db push && ts-node prisma/seed.ts"
+    "db:setup": "prisma generate && prisma db push && ts-node prisma/seed.ts",
+    "test": "ts-node test-suite.ts"
   },
   "keywords": ["erp", "crm", "wholesale", "inventory", "challan"],
   "author": "",
