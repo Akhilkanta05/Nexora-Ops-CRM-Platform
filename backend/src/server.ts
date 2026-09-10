@@ -29,7 +29,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'mini-erp-crm-backend',
+    service: 'nexora-backend',
     environment: config.nodeEnv,
   });
 });
